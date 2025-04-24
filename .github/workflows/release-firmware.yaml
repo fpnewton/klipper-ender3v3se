@@ -1,0 +1,28 @@
+name: Release Firmware
+
+on:
+  push:
+    tags:
+      - "v\\d+.\\d+.\\d+"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get tag name
+        id: tag
+        run: echo "TAG_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+
+      - name: Rename files
+        run: |
+          tag_name=${TAG_NAME}
+          mv ci_build/output/*.bin ci_build/output/"$(basename ci_build/output/*.bin .bin)_$tag_name.bin"
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ci_build/output/*.bin
+          fail_on_unmatched_files: true

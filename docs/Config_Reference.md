@@ -126,8 +126,6 @@ max_accel:
 #   decelerate to zero at each corner. The value specified here may be
 #   changed at runtime using the SET_VELOCITY_LIMIT command. The
 #   default is 5mm/s.
-#max_accel_to_decel:
-#   This parameter is deprecated and should no longer be used.
 ```
 
 ### [stepper]
@@ -740,7 +738,6 @@ max_velocity:
 max_accel:
 #minimum_cruise_ratio:
 #square_corner_velocity:
-#max_accel_to_decel:
 #max_z_velocity:
 #max_z_accel:
 
@@ -4947,8 +4944,8 @@ detection_length: 7.0
 #   a state change on the switch_pin
 #   Default is 7 mm.
 extruder:
-#   The name of the extruder section this sensor is associated with.
-#   This parameter must be provided.
+#   The name of the extruder or extruder_stepper section this sensor
+#   is associated with. This parameter must be provided.
 switch_pin:
 #pause_on_runout:
 #runout_gcode:

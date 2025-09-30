@@ -138,6 +138,7 @@ class InputShaper:
         if self.toolhead is None:
             # Klipper initialization is not yet completed
             return
+        self.toolhead.flush_step_generation()
         ffi_main, ffi_lib = chelper.get_ffi()
         kin = self.toolhead.get_kinematics()
         for s in kin.get_steppers():
@@ -146,12 +147,9 @@ class InputShaper:
             is_sk = self._get_input_shaper_stepper_kinematics(s)
             if is_sk is None:
                 continue
-            old_delay = ffi_lib.input_shaper_get_step_generation_window(is_sk)
             ffi_lib.input_shaper_update_sk(is_sk)
-            new_delay = ffi_lib.input_shaper_get_step_generation_window(is_sk)
-            if old_delay != new_delay:
-                self.toolhead.note_step_generation_scan_time(new_delay,
-                                                             old_delay)
+        motion_queuing = self.printer.lookup_object("motion_queuing")
+        motion_queuing.check_step_generation_scan_windows()
     def _update_input_shaping(self, error=None):
         self.toolhead.flush_step_generation()
         ffi_main, ffi_lib = chelper.get_ffi()
@@ -163,16 +161,13 @@ class InputShaper:
             is_sk = self._get_input_shaper_stepper_kinematics(s)
             if is_sk is None:
                 continue
-            old_delay = ffi_lib.input_shaper_get_step_generation_window(is_sk)
             for shaper in self.shapers:
                 if shaper in failed_shapers:
                     continue
                 if not shaper.set_shaper_kinematics(is_sk):
                     failed_shapers.append(shaper)
-            new_delay = ffi_lib.input_shaper_get_step_generation_window(is_sk)
-            if old_delay != new_delay:
-                self.toolhead.note_step_generation_scan_time(new_delay,
-                                                             old_delay)
+        motion_queuing = self.printer.lookup_object("motion_queuing")
+        motion_queuing.check_step_generation_scan_windows()
         if failed_shapers:
             error = error or self.printer.command_error
             raise error("Failed to configure shaper(s) %s with given parameters"

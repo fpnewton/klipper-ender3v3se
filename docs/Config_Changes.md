@@ -8,6 +8,30 @@ All dates in this document are approximate.
 
 ## Changes
 
+20260318: The `[probe_eddy_current]` config options `speed`,
+`lift_speed`, `samples`, `sample_retract_dist`, `samples_result`,
+`samples_tolerance`, and `samples_tolerance_retries` no longer apply
+to probe commands using `METHOD=scan`, `METHOD=rapid_scan`, nor
+`METHOD=tap`. To use different settings, supply the equivalent
+`PROBE_SPEED`, `LIFT_SPEED`, `SAMPLES`, `SAMPLE_RETRACT_DIST`,
+`SAMPLES_RESULT`, `SAMPLES_TOLERANCE`, or `SAMPLES_TOLERANCE_RETRIES`
+parameter with the probe command.
+
+20260318: The `[probe_eddy_current]` config option `z_offset` has been
+renamed to `descend_z`. Using the old name is deprecated and it will
+be removed in the near future.
+
+20260214: The `MANUAL_STEPPER` G-Code command `STOP_ON_ENDSTOP`
+parameter has changed. See the
+[MANUAL_STEPPER](G-Codes.md#manual_stepper) documentation for
+details. Using the previous integer values (-2, -1, 1, 2) is
+deprecated and support will be removed in the near future.
+
+20260207: The low-level i2c behavior of sx1509 and uc1701 devices has
+changed. Previously an i2c error would result in a shutdown, and now
+i2c errors when communicating with these devices will only generate
+warnings in the log file.
+
 20260109: The status value `{printer.probe.last_z_result}` is
 deprecated; it will be removed in the near future. Use
 `{printer.probe.last_probe_position}` instead, and note that this new

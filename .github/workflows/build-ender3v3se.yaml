@@ -1,0 +1,66 @@
+name: Build Ender3 V3 SE Firmware
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - '.github/workflows/build-ender3v3se.yml'
+      - 'Makefile'
+      - 'src/**'
+      - 'klippy/**'
+      - 'lib/**'
+      - 'scripts/**'
+      - 'config.ender3v3se'
+      - 'make-ender3v3se.sh'
+  pull_request:
+    paths:
+      - '.github/workflows/build-ender3v3se.yml'
+      - 'Makefile'
+      - 'src/**'
+      - 'klippy/**'
+      - 'lib/**'
+      - 'scripts/**'
+      - 'config.ender3v3se'
+      - 'make-ender3v3se.sh'
+  workflow_dispatch:
+
+jobs:
+  build-ender3v3se:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            gcc-arm-none-eabi \
+            binutils-arm-none-eabi \
+            libnewlib-arm-none-eabi \
+            python3 \
+            python3-venv \
+            python3-pip
+
+      - name: Make build script executable
+        run: chmod +x ./make-ender3v3se.sh
+
+      - name: Build firmware
+        run: |
+          ./make-ender3v3se.sh clean
+          ./make-ender3v3se.sh
+
+      - name: Rename firmware artifact
+        run: |
+          cp out/klipper.bin out/klipper-ender3v3se-${GITHUB_SHA::7}.bin
+
+      - name: Upload firmware artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: klipper-ender3v3se-firmware
+          path: |
+            out/klipper.bin
+            out/klipper-ender3v3se-*.bin

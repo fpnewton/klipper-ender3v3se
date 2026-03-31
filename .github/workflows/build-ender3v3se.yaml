@@ -1,33 +1,47 @@
-name: Build Ender3 V3 SE Firmware
+name: Build Firmware
 
 on:
   push:
     branches:
       - master
     paths:
-      - '.github/workflows/build-ender3v3se.yml'
+      - '.github/workflows/build-firmware.yml'
       - 'Makefile'
       - 'src/**'
       - 'klippy/**'
       - 'lib/**'
       - 'scripts/**'
-      - 'config.ender3v3se'
-      - 'make-ender3v3se.sh'
+      - 'config.*'
+      - 'make-*.sh'
   pull_request:
     paths:
-      - '.github/workflows/build-ender3v3se.yml'
+      - '.github/workflows/build-firmware.yml'
       - 'Makefile'
       - 'src/**'
       - 'klippy/**'
       - 'lib/**'
       - 'scripts/**'
-      - 'config.ender3v3se'
-      - 'make-ender3v3se.sh'
+      - 'config.*'
+      - 'make-*.sh'
   workflow_dispatch:
 
 jobs:
-  build-ender3v3se:
+  build:
     runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: ender3v3se
+            script: make-ender3v3se.sh
+            artifact: klipper-ender3v3se.bin
+          - name: ebb42
+            script: make-ebb42.sh
+            artifact: klipper-ebb42.bin
+          - name: adxl345
+            script: make-adxl345.sh
+            artifact: klipper-adxl345.bin
 
     steps:
       - name: Check out repository
@@ -45,22 +59,21 @@ jobs:
             python3-venv \
             python3-pip
 
-      - name: Make build script executable
-        run: chmod +x ./make-ender3v3se.sh
+      - name: Make build scripts executable
+        run: chmod +x make-*.sh
 
-      - name: Build firmware
+      - name: Build ${{ matrix.name }}
         run: |
-          ./make-ender3v3se.sh clean
-          ./make-ender3v3se.sh
+          ./${{ matrix.script }} clean
+          ./${{ matrix.script }}
 
-      - name: Rename firmware artifact
+      - name: Prepare artifact
         run: |
-          cp out/klipper.bin out/klipper-ender3v3se-${GITHUB_SHA::7}.bin
+          mkdir -p artifacts
+          cp out/klipper.bin artifacts/${{ matrix.artifact }}
 
-      - name: Upload firmware artifact
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: klipper-ender3v3se-firmware
-          path: |
-            out/klipper.bin
-            out/klipper-ender3v3se-*.bin
+          name: ${{ matrix.name }}-firmware
+          path: artifacts/${{ matrix.artifact }}

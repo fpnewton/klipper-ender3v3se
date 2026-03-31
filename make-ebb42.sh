@@ -1,13 +1,16 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
 CONFIG=config.ebb42
 
-if [[ "${1}" == "" ]]; then
-        make KCONFIG_CONFIG=${CONFIG} clean
+if [[ "${1:-}" == "clean" ]]; then
+  make KCONFIG_CONFIG="${CONFIG}" clean
+  exit 0
 fi
 
-make KCONFIG_CONFIG=${CONFIG} ${1}
-
-if [[ "${1}" == "" ]]; then
-	make KCONFIG_CONFIG=${CONFIG} serialflash FLASH_DEVICE=/dev/serial/by-id/usb-Klipper_stm32g0b1xx_3A003A0016504D4D34313220-if00
+if [[ "${1:-}" == "" ]]; then
+  make KCONFIG_CONFIG="${CONFIG}" clean
+  make KCONFIG_CONFIG="${CONFIG}"
+else
+  make KCONFIG_CONFIG="${CONFIG}" "${1}"
 fi

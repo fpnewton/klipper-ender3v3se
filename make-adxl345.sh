@@ -1,13 +1,16 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
 CONFIG=config.adxl345
 
-if [[ "${1}" == "" ]]; then
-	make KCONFIG_CONFIG=${CONFIG} clean
+if [[ "${1:-}" == "clean" ]]; then
+  make KCONFIG_CONFIG="${CONFIG}" clean
+  exit 0
 fi
 
-make KCONFIG_CONFIG=${CONFIG} ${1}
-
-if [[ "${1}" == "" ]]; then
-	sudo make KCONFIG_CONFIG=${CONFIG} flash FLASH_DEVICE=2e8a:0003
+if [[ "${1:-}" == "" ]]; then
+  make KCONFIG_CONFIG="${CONFIG}" clean
+  make KCONFIG_CONFIG="${CONFIG}"
+else
+  make KCONFIG_CONFIG="${CONFIG}" "${1}"
 fi
